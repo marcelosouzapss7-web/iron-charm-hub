@@ -13,7 +13,7 @@ export const produtosQuery = queryOptions({
   queryFn: async () => {
     const { data, error } = await supabase
       .from("products")
-      .select("id,name,price,image_url,position,created_at")
+      .select("id,name,price,old_price,description,best_seller,image_url,position,created_at")
       .order("position", { ascending: true })
       .order("created_at", { ascending: false });
     if (error) throw error;
@@ -285,6 +285,56 @@ function Index() {
                 >
                   {s?.featured_button || "eu quero!"}
                 </button>
+              </div>
+            </section>
+          )}
+          {produtos.some((p) => p.best_seller) && (
+            <section className="pt-10">
+              <h2 className="px-4 pb-6 text-center text-[2.4rem] font-bold leading-[1.05] text-primary">
+                os mais vendidos
+              </h2>
+              <div className="space-y-12 px-5">
+                {produtos.filter((p) => p.best_seller).map((p) => (
+                  <div key={p.id}>
+                    <Link to="/produto/$id" params={{ id: p.id }} className="block">
+                      {p.image_url ? (
+                        <img src={p.image_url} alt={p.name} loading="lazy" className="aspect-square w-full object-contain" />
+                      ) : (
+                        <div className="aspect-square w-full bg-muted" />
+                      )}
+                      <p className="mt-4 text-base font-bold leading-snug text-foreground">{p.name}</p>
+                      {p.description && (
+                        <p className="mt-2 line-clamp-1 text-sm text-foreground">{p.description}</p>
+                      )}
+                      {p.old_price != null && Number(p.old_price) > Number(p.price) && (
+                        <p className="text-xs font-semibold text-muted-foreground line-through">{brl(Number(p.old_price))}</p>
+                      )}
+                      <p className="text-lg font-bold text-foreground">
+                        {brl(p.price)}{" "}
+                        <span className="text-xs font-normal">ou 6x {brl(Number(p.price) / 6)}</span>
+                      </p>
+                    </Link>
+                    <div className="mt-3 flex gap-2">
+                      <Link
+                        to="/produto/$id"
+                        params={{ id: p.id }}
+                        className="flex-1 rounded-md bg-primary py-3 text-center text-sm font-bold text-primary-foreground"
+                      >
+                        Comprar
+                      </Link>
+                      <button
+                        aria-label="Adicionar à sacola"
+                        onClick={() => {
+                          cart.add({ id: p.id, name: p.name, price: Number(p.price), image: p.image_url || null, size: null });
+                          cart.open();
+                        }}
+                        className="flex w-20 items-center justify-center gap-2 rounded-md border border-primary text-primary"
+                      >
+                        <Plus className="size-3" /> <ShoppingCart className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
           )}

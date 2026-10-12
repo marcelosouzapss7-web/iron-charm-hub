@@ -58,6 +58,7 @@ export type Database = {
       }
       products: {
         Row: {
+          best_seller: boolean
           created_at: string
           description: string | null
           has_sizes: boolean
@@ -74,6 +75,7 @@ export type Database = {
           product_hash: string | null
         }
         Insert: {
+          best_seller?: boolean
           created_at?: string
           description?: string | null
           has_sizes?: boolean
@@ -90,6 +92,7 @@ export type Database = {
           product_hash?: string | null
         }
         Update: {
+          best_seller?: boolean
           created_at?: string
           description?: string | null
           has_sizes?: boolean

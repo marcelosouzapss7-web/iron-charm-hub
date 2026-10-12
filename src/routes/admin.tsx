@@ -255,6 +255,7 @@ function Produtos() {
   const [desc, setDesc] = useState("");
   const [temTamanhos, setTemTamanhos] = useState(true);
   const [temVoltagem, setTemVoltagem] = useState(false);
+  const [maisVendido, setMaisVendido] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const { data: produtos = [] } = useQuery({
@@ -264,7 +265,7 @@ function Produtos() {
         await supabase
           .from("products")
           .select(
-            "id,name,price,old_price,description,has_sizes,has_voltage,images,image_url,position,created_at",
+            "id,name,price,old_price,description,has_sizes,has_voltage,best_seller,images,image_url,position,created_at",
           )
           .order("position", { ascending: true })
           .order("created_at", { ascending: false })
@@ -279,6 +280,7 @@ function Produtos() {
     setDesc(p.description ?? "");
     setTemTamanhos((p as any).has_sizes !== false);
     setTemVoltagem((p as any).has_voltage === true);
+    setMaisVendido((p as any).best_seller === true);
     const imgs = p.images?.length ? p.images : p.image_url ? [p.image_url] : [];
     setFotos([0, 1, 2, 3].map((i) => (imgs[i] ? { url: imgs[i] } : null)));
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -296,6 +298,7 @@ function Produtos() {
     setDesc("");
     setTemTamanhos(true);
     setTemVoltagem(false);
+    setMaisVendido(false);
     form?.reset();
   }
 
@@ -348,6 +351,7 @@ function Produtos() {
         description: desc.trim() || "",
         has_sizes: temTamanhos,
         has_voltage: temVoltagem,
+        best_seller: maisVendido,
         images: urls,
         image_url: urls[0] ?? "",
       };
@@ -512,6 +516,15 @@ function Produtos() {
             className="h-4 w-4 accent-primary"
           />
           Mostrar opção de voltagem (127V/220V) neste produto
+        </label>
+        <label className="flex items-center gap-2 text-sm sm:col-span-2">
+          <input
+            type="checkbox"
+            checked={maisVendido}
+            onChange={(e) => setMaisVendido(e.target.checked)}
+            className="h-4 w-4 accent-primary"
+          />
+          Mostrar em "os mais vendidos" na página inicial
         </label>
         <Button type="submit" disabled={saving} className={editId ? "" : "sm:col-span-2"}>
           {saving ? "Salvando…" : editId ? "Salvar alterações" : "Adicionar produto"}
