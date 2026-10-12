@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Instagram, Facebook, MessageCircle } from "lucide-react";
+import { ArrowRight, ArrowUp, Instagram, Facebook, MessageCircle } from "lucide-react";
 
 const grupos = [
   { titulo: "SOBRE NÓS", itens: ["nossas lojas", "quem somos", "seja um(a) revendedor(a)", "trabalhe conosco"] },
@@ -29,6 +29,7 @@ export function StoreFooter() {
   const titulo = "pb-4 pt-8 text-center text-base font-bold text-foreground";
 
   return (
+    <>
     <footer className="bg-footer px-4 pb-10 pt-8 text-foreground">
       <h2 className="text-center text-base font-bold">INSCREVA-SE PARA RECEBER NOSSAS NOVIDADES</h2>
       <form
@@ -90,5 +91,12 @@ export function StoreFooter() {
           .map((l: string, i: number) => <p key={i}>{l}</p>)}
       </div>
     </footer>
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="flex w-full items-center justify-center gap-3 bg-primary py-4 text-base font-bold text-primary-foreground"
+    >
+      <ArrowUp className="size-5" strokeWidth={2.5} /> Voltar ao Topo
+    </button>
+    </>
   );
 }
