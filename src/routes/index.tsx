@@ -252,12 +252,6 @@ function Index() {
               <div key={p.id} className="w-[62%] shrink-0 snap-start">{card(p, idx)}</div>
             ))}
           </div>
-          {resto.length > 0 && (
-            <>
-              <h2 className="px-4 pb-4 pt-10 text-center text-3xl font-bold text-primary">mais produtos</h2>
-              <div className="grid grid-cols-2 gap-3 px-3">
-                {resto.map((p, idx) => <div key={p.id}>{card(p, idx + destaques.length)}</div>)}
-          </div>
           {(s?.featured_image_url || s?.featured_title) && (
             <section className="mx-3 mt-10 overflow-hidden rounded border bg-background shadow-sm">
               {s?.featured_image_url && (
@@ -277,6 +271,13 @@ function Index() {
               </div>
             </section>
           )}
+          {resto.length > 0 && (
+            <>
+              <h2 id="mais-produtos" className="px-4 pb-4 pt-10 text-center text-3xl font-bold text-primary">mais produtos</h2>
+              <div className="grid grid-cols-2 gap-3 px-3">
+                {resto.map((p, idx) => <div key={p.id}>{card(p, idx + destaques.length)}</div>)}
+          </div>
+
             </>
           )}
           {produtos.length === 0 && (
