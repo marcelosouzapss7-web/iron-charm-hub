@@ -8,6 +8,13 @@
       "when": 1791837525296,
       "tag": "0000_loja_inicial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791840639477,
+      "tag": "0001_hero_extra_images",
+      "breakpoints": true
     }
   ]
 }
