@@ -10,5 +10,5 @@
 - [x] Trazer a loja do GitHub para este projeto (código + banco)
 - [x] Pix: cada produto usa seu próprio offer hash e product hash (cadastrados no admin); só o token da IronPay vai nas configurações
 - [ ] Token da IronPay (aguardando o usuário)
-- [ ] Fotos dos produtos: liberar pastas públicas nas configurações do workspace
+- [x] Fotos dos produtos: pasta pública liberada
 - [ ] Importar produtos/pedidos do projeto original (aguardando exportação)
