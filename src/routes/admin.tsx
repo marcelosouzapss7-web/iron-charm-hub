@@ -636,8 +636,18 @@ function Config() {
         onChange={async (e) => {
           const f = e.target.files?.[0];
           if (!f) return;
-          const { compressProductImage } = await import("@/lib/product-images.mjs");
-          const { blob, extension } = await compressProductImage(f, Math.max(max, 1200));
+          let blob: Blob, extension: string;
+          if (f.type === "image/gif") {
+            if (f.size > 10 * 1024 * 1024) return void toast.error("O GIF deve ter no máximo 10 MB.");
+            blob = f; extension = "gif";
+          } else {
+            try {
+              const { compressProductImage } = await import("@/lib/product-images.mjs");
+              ({ blob, extension } = await compressProductImage(f, Math.max(max, 1200)));
+            } catch (err) {
+              return void toast.error(err instanceof Error ? err.message : "Imagem inválida.");
+            }
+          }
           const path = `site/${key}-${crypto.randomUUID()}.${extension}`;
           const { error } = await supabase.storage
             .from("products")
