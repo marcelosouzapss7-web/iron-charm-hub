@@ -643,11 +643,7 @@ function Config() {
             .from("products")
             .upload(path, blob, { contentType: blob.type, cacheControl: "31536000" });
           if (error) return void toast.error("Não foi possível enviar a imagem.");
-          const { data: signed, error: se } = await supabase.storage
-            .from("products")
-            .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-          if (se || !signed) return void toast.error("Não foi possível gerar o link da imagem.");
-          await save({ [key]: signed.signedUrl });
+          await save({ [key]: supabase.storage.from("products").getPublicUrl(path).data.publicUrl });
         }}
       />
       {(settings as any)?.[key] && (
