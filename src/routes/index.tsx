@@ -3,7 +3,7 @@ import { StoreHeader } from "@/components/StoreHeader";
 import { StoreFooter } from "@/components/StoreFooter";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ShoppingCart, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Plus } from "lucide-react";
 import { cart, useCart } from "@/lib/cart";
 import { useEffect, useRef, useState } from "react";
 
@@ -145,10 +145,6 @@ function Index() {
   const destaques = produtos.slice(0, 8);
   const resto = produtos.slice(8);
   const card = (p: (typeof produtos)[number], idx: number) => {
-              const k = itens.findIndex(
-                (i) => i.id === p.id && i.size === null && i.image === (p.image_url || null),
-              );
-              const q = itens[k]?.qty ?? 0;
               return (
                 <div>
                   <Link to="/produto/$id" params={{ id: p.id }} className="block">
