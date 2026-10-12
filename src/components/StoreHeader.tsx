@@ -1,3 +1,4 @@
+import logoPadrao from "@/assets/logo-header.png";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -70,7 +71,7 @@ export function StoreHeader() {
         onClick={() => { window.scrollTo(0, 0); setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50); }}
         className="absolute left-1/2 -translate-x-1/2 shrink-0"
       >
-        {logoUrl && <img src={logoUrl} alt="Logo da loja" className="h-10 w-auto max-w-[160px] object-contain mix-blend-multiply" />}
+        <img src={logoUrl || logoPadrao} alt="wepink" className="h-8 w-auto max-w-[160px] object-contain" />
       </Link>
       <div className="flex items-center gap-5 text-foreground">
         <User className="size-7" strokeWidth={2.4} />
