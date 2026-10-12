@@ -7,3 +7,8 @@
 - [x] Produto: carrossel horizontal com até 6 outros produtos abaixo da descrição
 - [x] Login do admin: servidor sobrecarregado foi reiniciado; entrada testada com sucesso
 - [x] Servidor da loja (Lovable Cloud): já ativo no projeto, nada a ativar
+- [x] Trazer a loja do GitHub para este projeto (código + banco)
+- [x] Pix: cada produto usa seu próprio offer hash e product hash (cadastrados no admin); só o token da IronPay vai nas configurações
+- [ ] Token da IronPay (aguardando o usuário)
+- [ ] Fotos dos produtos: liberar pastas públicas nas configurações do workspace
+- [ ] Importar produtos/pedidos do projeto original (aguardando exportação)
