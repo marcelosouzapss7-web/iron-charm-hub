@@ -5,7 +5,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { cart, useCart } from "@/lib/cart";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const produtosQuery = queryOptions({
   queryKey: ["products"],
@@ -95,7 +95,16 @@ function Index() {
   const itens = useCart().items;
   const { data: produtos = [], isPending, isError, refetch } = useQuery(produtosQuery);
   const { data: settings } = useQuery(settingsQuery);
-  const hero = (settings as any)?.hero_image_url as string | undefined;
+  const s = settings as any;
+  const heros = [s?.hero_image_url, s?.hero_image_url_2, s?.hero_image_url_3].filter(
+    Boolean,
+  ) as string[];
+  const [slide, setSlide] = useState(0);
+  useEffect(() => {
+    if (heros.length < 2) return;
+    const t = setInterval(() => setSlide((n) => n + 1), 3000);
+    return () => clearInterval(t);
+  }, [heros.length]);
 
   function irParaProdutos() {
     document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
@@ -203,16 +212,34 @@ function Index() {
       <div className="mx-auto min-h-screen max-w-md bg-background">
         <StoreHeader />
 
-        {hero && (
-          <section className="bg-background">
+        {heros.length > 0 && (
+          <section className="relative overflow-hidden bg-background">
             <button onClick={irParaProdutos} className="block w-full" aria-label="Ver produtos">
-              <img
-                src={hero}
-                alt="Promoção da loja"
-                fetchPriority="high"
-                className="block h-auto w-full"
-              />
+              <div
+                className="flex transition-transform duration-700 ease-in-out"
+                style={{ transform: `translateX(-${(slide % heros.length) * 100}%)` }}
+              >
+                {heros.map((src, i) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt={`Promoção da loja ${i + 1}`}
+                    fetchPriority={i === 0 ? "high" : "auto"}
+                    className="block h-auto w-full shrink-0"
+                  />
+                ))}
+              </div>
             </button>
+            {heros.length > 1 && (
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+                {heros.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`size-2 rounded-full ${i === slide % heros.length ? "bg-primary" : "bg-background/70"}`}
+                  />
+                ))}
+              </div>
+            )}
           </section>
         )}
 

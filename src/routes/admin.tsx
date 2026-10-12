@@ -591,6 +591,8 @@ function Config() {
     payment_logo_url?: string | null;
     pix_logo_url?: string | null;
     hero_image_url?: string | null;
+    hero_image_url_2?: string | null;
+    hero_image_url_3?: string | null;
     footer_text?: string | null;
   }) {
     setSaving(true);
@@ -600,6 +602,8 @@ function Config() {
       payment_logo_url: settings?.payment_logo_url ?? null,
       pix_logo_url: (settings as any)?.pix_logo_url ?? null,
       hero_image_url: (settings as any)?.hero_image_url ?? null,
+      hero_image_url_2: (settings as any)?.hero_image_url_2 ?? null,
+      hero_image_url_3: (settings as any)?.hero_image_url_3 ?? null,
       footer_text: (settings as any)?.footer_text ?? null,
       ...patch,
       updated_at: new Date().toISOString(),
@@ -674,6 +678,8 @@ function Config() {
         1600,
         "Remover imagem principal",
       )}
+      {bloco("Imagem principal 2 (passa a cada 3 segundos)", "hero_image_url_2" as any, 1600, "Remover imagem 2")}
+      {bloco("Imagem principal 3 (passa a cada 3 segundos)", "hero_image_url_3" as any, 1600, "Remover imagem 3")}
       {bloco(
         "Bandeira (formas de pagamento no rodapé)",
         "payment_logo_url",

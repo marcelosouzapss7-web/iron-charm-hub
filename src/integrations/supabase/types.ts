@@ -111,6 +111,8 @@ export type Database = {
         Row: {
           footer_text: string | null
           hero_image_url: string | null
+          hero_image_url_2: string | null
+          hero_image_url_3: string | null
           id: number
           logo_url: string | null
           payment_logo_url: string | null
@@ -120,6 +122,8 @@ export type Database = {
         Insert: {
           footer_text?: string | null
           hero_image_url?: string | null
+          hero_image_url_2?: string | null
+          hero_image_url_3?: string | null
           id?: number
           logo_url?: string | null
           payment_logo_url?: string | null
@@ -129,6 +133,8 @@ export type Database = {
         Update: {
           footer_text?: string | null
           hero_image_url?: string | null
+          hero_image_url_2?: string | null
+          hero_image_url_3?: string | null
           id?: number
           logo_url?: string | null
           payment_logo_url?: string | null
