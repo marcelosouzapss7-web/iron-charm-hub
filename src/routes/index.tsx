@@ -3,8 +3,8 @@ import { StoreHeader } from "@/components/StoreHeader";
 import { StoreFooter } from "@/components/StoreFooter";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ShoppingCart, Plus, Minus } from "lucide-react";
-import { cart, useCart } from "@/lib/cart";
+import { ShoppingCart, Plus } from "lucide-react";
+import { cart } from "@/lib/cart";
 import { useEffect, useRef, useState } from "react";
 
 export const produtosQuery = queryOptions({
@@ -92,7 +92,6 @@ const brl = (v: number) =>
   Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function Index() {
-  const itens = useCart().items;
   const { data: produtos = [], isPending, isError, refetch } = useQuery(produtosQuery);
   const { data: settings } = useQuery(settingsQuery);
   const s = settings as any;
@@ -145,10 +144,6 @@ function Index() {
   const destaques = produtos.slice(0, 8);
   const resto = produtos.slice(8);
   const card = (p: (typeof produtos)[number], idx: number) => {
-              const k = itens.findIndex(
-                (i) => i.id === p.id && i.size === null && i.image === (p.image_url || null),
-              );
-              const q = itens[k]?.qty ?? 0;
               return (
                 <div>
                   <Link to="/produto/$id" params={{ id: p.id }} className="block">
@@ -168,43 +163,31 @@ function Index() {
                     </p>
                     <p className="mt-1 text-base font-bold text-primary">{brl(p.price)}</p>
                   </Link>
-                  {q === 0 ? (
+                  <div className="mt-2 flex gap-2">
+                    <Link
+                      to="/produto/$id"
+                      params={{ id: p.id }}
+                      className="flex-1 rounded-md bg-primary py-2.5 text-center text-sm font-bold text-primary-foreground"
+                    >
+                      Comprar
+                    </Link>
                     <button
+                      aria-label="Adicionar ao carrinho"
                       onClick={() =>
                         cart.add({
                           id: p.id,
                           name: p.name,
                           price: Number(p.price),
+                          oldPrice: p.old_price != null ? Number(p.old_price) : null,
                           image: p.image_url || null,
                           size: null,
                         })
                       }
-                      className="mt-2 flex w-full items-center justify-center gap-2 rounded bg-header py-2 text-xs font-bold text-header-foreground"
+                      className="flex w-14 items-center justify-center gap-1 rounded-md border border-primary text-primary"
                     >
-                      <ShoppingCart className="size-4" /> ADICIONAR
+                      <Plus className="size-3" /> <ShoppingCart className="size-4" />
                     </button>
-                  ) : (
-                    <div className="mt-2 flex items-center justify-between rounded border border-header-foreground">
-                      <button
-                        aria-label="Diminuir"
-                        onClick={() => (q <= 1 ? cart.remove(k) : cart.setQty(k, q - 1))}
-                        className="grid size-9 place-items-center text-header-foreground"
-                      >
-                        <Minus className="size-4" />
-                      </button>
-                      <span className="text-sm font-bold text-foreground">{q}</span>
-                      <button
-                        aria-label="Aumentar"
-                        onClick={() => {
-                          cart.setQty(k, q + 1);
-                          cart.open();
-                        }}
-                        className="grid size-9 place-items-center text-header-foreground"
-                      >
-                        <Plus className="size-4" />
-                      </button>
-                    </div>
-                  )}
+                  </div>
                 </div>
               );
   };
@@ -325,8 +308,7 @@ function Index() {
                       <button
                         aria-label="Adicionar à sacola"
                         onClick={() => {
-                          cart.add({ id: p.id, name: p.name, price: Number(p.price), image: p.image_url || null, size: null });
-                          cart.open();
+                          cart.add({ id: p.id, name: p.name, price: Number(p.price), oldPrice: p.old_price != null ? Number(p.old_price) : null, image: p.image_url || null, size: null });
                         }}
                         className="flex w-20 items-center justify-center gap-2 rounded-md border border-primary text-primary"
                       >

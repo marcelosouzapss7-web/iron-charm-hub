@@ -1,64 +1,109 @@
-import { Trash2, Check, X } from "lucide-react";
+import { ShoppingCart, X, Minus, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cart, useCart } from "@/lib/cart";
 
 const brl = (v: number) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-const serif = { fontFamily: "Georgia, 'Times New Roman', serif" };
 
 export function CartDrawer() {
-  const { items, open, toast } = useCart();
+  const { items, open } = useCart();
   if (!open) return null;
   const total = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const qtd = items.reduce((s, i) => s + i.qty, 0);
+  const cheio = items.reduce((s, i) => s + Math.max(i.oldPrice ?? i.price, i.price) * i.qty, 0);
+  const desconto = cheio - total;
   return (
-    <div className="fixed inset-0 z-50 flex justify-center bg-foreground/40" onClick={cart.close}>
-      <div className="relative flex h-full w-full max-w-md flex-col bg-background" style={serif} onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 pt-7">
-          <button onClick={cart.close} className="tracking-widest text-foreground">FECHAR</button>
-          <span className="mx-4 h-px flex-1 bg-border" />
-          <span className="tracking-widest text-primary">SACOLA</span>
+    <div className="fixed inset-0 z-50 flex justify-end bg-foreground/40" onClick={cart.close}>
+      <div
+        className="flex h-full w-[76%] max-w-sm flex-col bg-background animate-in slide-in-from-right"
+        style={{ fontFamily: "Montserrat, sans-serif" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b px-3 py-3">
+          <span className="flex items-center gap-2 text-xl font-bold text-foreground">
+            <ShoppingCart className="size-5" /> seu carrinho
+          </span>
+          <button aria-label="Fechar" onClick={cart.close} className="text-foreground">
+            <X className="size-7" />
+          </button>
         </div>
-        <p className="mt-8 text-center text-xs tracking-widest text-muted-foreground">
-          SUA SACOLA TEM: {qtd} {qtd === 1 ? "ITEM" : "ITENS"}
-        </p>
-        <div className="relative flex-1 overflow-y-auto px-4">
+        <div className="flex-1 overflow-y-auto px-3">
+          {items.length === 0 && (
+            <p className="py-10 text-center text-sm text-muted-foreground">Seu carrinho está vazio.</p>
+          )}
           {items.map((it, k) => (
-            <div key={k} className="mt-5 flex gap-3">
-              {it.image ? <img src={it.image} alt={it.name} className="h-24 w-[74px] rounded object-cover" /> : <div className="h-24 w-[74px] rounded bg-muted" />}
+            <div key={k} className="flex gap-3 border-b py-4">
+              {it.image ? (
+                <img src={it.image} alt={it.name} className="size-24 shrink-0 object-contain" />
+              ) : (
+                <div className="size-24 shrink-0 bg-muted" />
+              )}
               <div className="flex-1">
                 <div className="flex items-start gap-2">
-                  <p className="flex-1 text-xs uppercase leading-5 text-foreground">{it.name}{it.size ? <><br />Tam. {it.size}</> : null}</p>
-                  <button aria-label="Remover" onClick={() => cart.remove(k)} className="text-muted-foreground"><Trash2 className="h-4 w-4" /></button>
+                  <p className="flex-1 text-xs font-bold leading-snug text-foreground">
+                    {it.name}
+                    {it.size ? ` — Tam. ${it.size}` : ""}
+                  </p>
+                  <button
+                    aria-label="Remover"
+                    onClick={() => cart.remove(k)}
+                    className="grid size-4 place-items-center rounded-full bg-muted-foreground/40 text-background"
+                  >
+                    <X className="size-3" />
+                  </button>
                 </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <div className="flex h-8 items-stretch rounded border text-sm">
-                    <button className="w-9 bg-muted" onClick={() => cart.setQty(k, it.qty - 1)}>−</button>
-                    <span className="grid w-9 place-items-center">{it.qty}</span>
-                    <button className="w-9 bg-muted" onClick={() => cart.setQty(k, it.qty + 1)}>+</button>
+                <div className="mt-2 flex items-end justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      aria-label="Diminuir"
+                      onClick={() => (it.qty <= 1 ? cart.remove(k) : cart.setQty(k, it.qty - 1))}
+                      className="grid size-7 place-items-center rounded-full bg-primary text-primary-foreground"
+                    >
+                      <Minus className="size-4" strokeWidth={3} />
+                    </button>
+                    <span className="text-sm font-bold">{it.qty}</span>
+                    <button
+                      aria-label="Aumentar"
+                      onClick={() => cart.setQty(k, it.qty + 1)}
+                      className="grid size-7 place-items-center rounded-full bg-primary text-primary-foreground"
+                    >
+                      <Plus className="size-4" strokeWidth={3} />
+                    </button>
                   </div>
-                  <span className="text-primary">{brl(it.price * it.qty)}</span>
+                  <div className="text-right">
+                    {it.oldPrice != null && it.oldPrice > it.price && (
+                      <p className="text-xs text-muted-foreground line-through">{brl(it.oldPrice * it.qty)}</p>
+                    )}
+                    <p className="text-base font-bold text-primary">{brl(it.price * it.qty)}</p>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
-          {toast && (
-            <div className="absolute left-14 right-14 top-24 flex items-center gap-3 rounded bg-background p-3 shadow-lg animate-fade-in" style={{ fontFamily: "Montserrat, sans-serif" }}>
-              <span className="grid h-8 w-8 place-items-center rounded-full border-2 border-[hsl(110_50%_75%)] text-[hsl(110_50%_45%)]"><Check className="h-5 w-5" /></span>
-              <span className="flex-1 text-sm text-muted-foreground">Produto adicionado ao carrinho</span>
-              <button aria-label="Fechar aviso" onClick={cart.hideToast} className="text-muted-foreground"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="border-t px-3 pb-5 pt-5 shadow-[0_-10px_20px_-15px_rgba(0,0,0,0.15)]">
+          {desconto > 0 && (
+            <div className="flex items-center justify-between text-xs font-semibold">
+              <span>descontos</span>
+              <span className="text-base font-bold text-primary">-{brl(desconto)}</span>
             </div>
           )}
-        </div>
-        <p className="mx-4 mb-3 rounded bg-muted px-3 py-2 text-center text-xs text-foreground" style={{ fontFamily: "Montserrat, sans-serif" }}>
-          {total > 150 ? "🎉 Parabéns! Seu frete é GRÁTIS." : `Compras acima de R$ 150,00 têm FRETE GRÁTIS! Faltam ${brl(150 - total)}.`}
-        </p>
-        <div className="border-t px-6 pb-8 pt-6 shadow-[0_-10px_20px_-15px_rgba(0,0,0,0.15)]">
-          <div className="flex items-center justify-between">
-            <span className="text-sm tracking-widest text-foreground">SUBTOTAL</span>
-            <span className="text-lg text-foreground">{brl(total)}</span>
+          <div className="mt-3 flex items-center justify-between text-xs font-semibold">
+            <span>total</span>
+            <span className="text-base font-bold text-primary">{brl(total)}</span>
           </div>
-          <Link to="/carrinho" onClick={cart.close} className="mt-8 block w-full rounded-full bg-foreground py-4 text-center text-lg tracking-[0.2em] text-background shadow-lg">FINALIZAR COMPRA</Link>
-          <button onClick={cart.close} className="mx-auto mt-4 block text-xs tracking-wider text-muted-foreground underline">CONTINUAR COMPRANDO</button>
+          <div className="mt-8 flex items-center justify-between gap-3">
+            <button onClick={cart.close} className="text-left text-xs font-bold leading-tight underline">
+              continuar
+              <br />
+              comprando
+            </button>
+            <Link
+              to="/carrinho"
+              onClick={cart.close}
+              className="rounded-md bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"
+            >
+              finalizar compra
+            </Link>
+          </div>
         </div>
       </div>
     </div>
