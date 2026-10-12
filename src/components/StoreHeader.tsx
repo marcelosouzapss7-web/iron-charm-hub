@@ -1,4 +1,4 @@
-import logo from "@/assets/logo-look-china.png.asset.json";
+import logo from "@/assets/logo-look-china.png";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
