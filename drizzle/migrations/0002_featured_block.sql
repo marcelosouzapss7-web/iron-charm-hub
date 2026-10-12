@@ -1,0 +1,1 @@
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS featured_image_url text, ADD COLUMN IF NOT EXISTS featured_tag text, ADD COLUMN IF NOT EXISTS featured_title text, ADD COLUMN IF NOT EXISTS featured_description text, ADD COLUMN IF NOT EXISTS featured_price text, ADD COLUMN IF NOT EXISTS featured_button text;
