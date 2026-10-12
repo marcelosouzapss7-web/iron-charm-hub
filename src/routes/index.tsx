@@ -217,10 +217,10 @@ function Index() {
         {heros.length > 0 && (
           <section
             className="relative overflow-hidden bg-background"
-            onTouchStart={(e) => (toqueX.current = e.touches[0].clientX)}
+            onTouchStart={(e) => (toqueX.current = (e.touches[0]?.clientX ?? null))}
             onTouchEnd={(e) => {
               if (toqueX.current === null || heros.length < 2) return;
-              const dx = e.changedTouches[0].clientX - toqueX.current;
+              const dx = (e.changedTouches[0]?.clientX ?? toqueX.current) - toqueX.current;
               toqueX.current = null;
               if (Math.abs(dx) < 40) return;
               arrastou.current = true;
