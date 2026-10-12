@@ -131,39 +131,15 @@ function Index() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-muted" style={{ fontFamily: "Montserrat, sans-serif" }}>
-      <div className="mx-auto min-h-screen max-w-md bg-background">
-        <StoreHeader />
-
-        {hero && (
-          <section className="bg-background">
-            <button onClick={irParaProdutos} className="block w-full" aria-label="Ver produtos">
-              <img
-                src={hero}
-                alt="Promoção da loja"
-                fetchPriority="high"
-                className="block h-auto w-full"
-              />
-            </button>
-          </section>
-        )}
-
-        <main id="produtos" className="px-3 pb-10">
-          <h1
-            className="py-5 text-center text-3xl text-foreground"
-            style={{ fontFamily: "'Bebas Neue', sans-serif" }}
-          >
-            NOSSOS PRODUTOS
-          </h1>
-          <div className="grid grid-cols-2 gap-3">
-            {produtos.map((p, idx) => {
+  const destaques = produtos.slice(0, 8);
+  const resto = produtos.slice(8);
+  const card = (p: (typeof produtos)[number], idx: number) => {
               const k = itens.findIndex(
                 (i) => i.id === p.id && i.size === null && i.image === (p.image_url || null),
               );
               const q = itens[k]?.qty ?? 0;
               return (
-                <div key={p.id}>
+                <div>
                   <Link to="/produto/$id" params={{ id: p.id }} className="block">
                     {p.image_url ? (
                       <ImagemPrincipal
@@ -220,8 +196,43 @@ function Index() {
                   )}
                 </div>
               );
-            })}
+  };
+
+  return (
+    <div className="min-h-screen bg-muted" style={{ fontFamily: "Montserrat, sans-serif" }}>
+      <div className="mx-auto min-h-screen max-w-md bg-background">
+        <StoreHeader />
+
+        {hero && (
+          <section className="bg-background">
+            <button onClick={irParaProdutos} className="block w-full" aria-label="Ver produtos">
+              <img
+                src={hero}
+                alt="Promoção da loja"
+                fetchPriority="high"
+                className="block h-auto w-full"
+              />
+            </button>
+          </section>
+        )}
+
+        <main id="produtos" className="pb-10">
+          <h1 className="px-4 pb-6 pt-8 text-center text-[2.4rem] font-bold leading-[1.05] text-primary">
+            queridinhos da wepink
+          </h1>
+          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
+            {destaques.map((p, idx) => (
+              <div key={p.id} className="w-[62%] shrink-0 snap-start">{card(p, idx)}</div>
+            ))}
           </div>
+          {resto.length > 0 && (
+            <>
+              <h2 className="px-4 pb-4 pt-10 text-center text-3xl font-bold text-primary">mais produtos</h2>
+              <div className="grid grid-cols-2 gap-3 px-3">
+                {resto.map((p, idx) => <div key={p.id}>{card(p, idx + destaques.length)}</div>)}
+              </div>
+            </>
+          )}
           {produtos.length === 0 && (
             <p className="py-8 text-center text-sm text-muted-foreground">
               Nenhum produto cadastrado ainda.
