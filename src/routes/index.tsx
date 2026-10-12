@@ -4,7 +4,7 @@ import { StoreFooter } from "@/components/StoreFooter";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ShoppingCart, Plus } from "lucide-react";
-import { cart, useCart } from "@/lib/cart";
+import { cart } from "@/lib/cart";
 import { useEffect, useRef, useState } from "react";
 
 export const produtosQuery = queryOptions({
@@ -92,7 +92,6 @@ const brl = (v: number) =>
   Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function Index() {
-  const itens = useCart().items;
   const { data: produtos = [], isPending, isError, refetch } = useQuery(produtosQuery);
   const { data: settings } = useQuery(settingsQuery);
   const s = settings as any;
