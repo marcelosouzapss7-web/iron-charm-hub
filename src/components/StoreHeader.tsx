@@ -1,4 +1,3 @@
-import logo from "@/assets/logo-look-china.png";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +23,11 @@ export function StoreHeader() {
       .toLowerCase();
   const t = norm(termo.trim());
   const achados = t ? produtos.filter((p) => norm(p.name).includes(t)) : [];
+  const { data: logoUrl } = useQuery({
+    queryKey: ["site_settings", "header_logo"],
+    queryFn: async () =>
+      ((await supabase.from("site_settings").select("logo_url").eq("id", 1).maybeSingle()).data?.logo_url as string | null) ?? null,
+  });
   const qtd = useCart().items.reduce((s, i) => s + i.qty, 0);
   return (
     <header className="sticky top-0 z-10 shadow-sm">
@@ -62,11 +66,11 @@ export function StoreHeader() {
       </div>
       <Link
         to="/"
-        aria-label="Look China"
+        aria-label="Início"
         onClick={() => { window.scrollTo(0, 0); setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50); }}
         className="absolute left-1/2 -translate-x-1/2 shrink-0"
       >
-        <span className="flex items-center gap-2"><img src={logo} alt="" className="size-11 rounded-full" /><span className="whitespace-nowrap text-xl font-extrabold tracking-tight text-primary sm:text-2xl">Look China</span></span>
+        {logoUrl && <img src={logoUrl} alt="Logo da loja" className="h-10 w-auto max-w-[160px] object-contain" />}
       </Link>
       <div className="flex items-center gap-5 text-foreground">
         <User className="size-7" strokeWidth={2.4} />
