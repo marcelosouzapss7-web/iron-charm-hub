@@ -680,6 +680,30 @@ function Config() {
       )}
       {bloco("Imagem principal 2 (passa a cada 3 segundos)", "hero_image_url_2" as any, 1600, "Remover imagem 2")}
       {bloco("Imagem principal 3 (passa a cada 3 segundos)", "hero_image_url_3" as any, 1600, "Remover imagem 3")}
+      {bloco("Destaque do mês — imagem (abaixo dos primeiros produtos)", "featured_image_url" as any, 1200, "Remover destaque")}
+      <div className="space-y-3 rounded-xl bg-background p-4 shadow-sm">
+        <Label>Destaque do mês — textos (salvos ao sair do campo)</Label>
+        {(
+          [
+            ["featured_tag", "#destaque do mês"],
+            ["featured_title", "Título do produto"],
+            ["featured_description", "Descrição curta"],
+            ["featured_price", "R$ 66,90"],
+            ["featured_button", "eu quero!"],
+          ] as const
+        ).map(([k, ph]) => (
+          <Input
+            key={k + ((settings as any)?.[k] ?? "")}
+            placeholder={ph}
+            defaultValue={(settings as any)?.[k] ?? ""}
+            disabled={saving}
+            onBlur={(e) => {
+              const v = e.target.value.trim() || null;
+              if (v !== ((settings as any)?.[k] ?? null)) save({ [k]: v } as any);
+            }}
+          />
+        ))}
+      </div>
       {bloco(
         "Bandeira (formas de pagamento no rodapé)",
         "payment_logo_url",

@@ -257,7 +257,26 @@ function Index() {
               <h2 className="px-4 pb-4 pt-10 text-center text-3xl font-bold text-primary">mais produtos</h2>
               <div className="grid grid-cols-2 gap-3 px-3">
                 {resto.map((p, idx) => <div key={p.id}>{card(p, idx + destaques.length)}</div>)}
+          </div>
+          {(s?.featured_image_url || s?.featured_title) && (
+            <section className="mx-3 mt-10 overflow-hidden rounded border bg-background shadow-sm">
+              {s?.featured_image_url && (
+                <img src={s.featured_image_url} alt={s?.featured_title || "Destaque do mês"} className="block h-auto w-full" />
+              )}
+              <div className="bg-primary px-9 py-9 text-primary-foreground">
+                {s?.featured_tag && <p className="text-xl font-bold">{s.featured_tag}</p>}
+                {s?.featured_title && <h2 className="mt-5 text-xl font-bold leading-tight">{s.featured_title}</h2>}
+                {s?.featured_description && <p className="mt-5 text-[15px] leading-snug">{s.featured_description}</p>}
+                {s?.featured_price && <p className="mt-8 text-base font-bold">{s.featured_price}</p>}
+                <button
+                  onClick={() => document.getElementById("mais-produtos")?.scrollIntoView({ behavior: "smooth" })}
+                  className="mt-5 w-full max-w-[162px] rounded border border-primary-foreground py-2 text-[15px]"
+                >
+                  {s?.featured_button || "eu quero!"}
+                </button>
               </div>
+            </section>
+          )}
             </>
           )}
           {produtos.length === 0 && (
