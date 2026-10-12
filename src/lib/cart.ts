@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export type CartItem = { id: string; name: string; price: number; image: string | null; size: string | null; qty: number };
+export type CartItem = { id: string; name: string; price: number; image: string | null; size: string | null; qty: number; oldPrice?: number | null };
 type State = { items: CartItem[]; open: boolean; toast: boolean };
 
 let state: State = { items: [], open: false, toast: false };
