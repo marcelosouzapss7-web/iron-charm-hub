@@ -15,6 +15,13 @@
       "when": 1791840639477,
       "tag": "0001_hero_extra_images",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791841374012,
+      "tag": "0002_featured_block",
+      "breakpoints": true
     }
   ]
 }

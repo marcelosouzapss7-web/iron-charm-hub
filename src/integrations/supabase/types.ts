@@ -109,6 +109,12 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          featured_button: string | null
+          featured_description: string | null
+          featured_image_url: string | null
+          featured_price: string | null
+          featured_tag: string | null
+          featured_title: string | null
           footer_text: string | null
           hero_image_url: string | null
           hero_image_url_2: string | null
@@ -120,6 +126,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          featured_button?: string | null
+          featured_description?: string | null
+          featured_image_url?: string | null
+          featured_price?: string | null
+          featured_tag?: string | null
+          featured_title?: string | null
           footer_text?: string | null
           hero_image_url?: string | null
           hero_image_url_2?: string | null
@@ -131,6 +143,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          featured_button?: string | null
+          featured_description?: string | null
+          featured_image_url?: string | null
+          featured_price?: string | null
+          featured_tag?: string | null
+          featured_title?: string | null
           footer_text?: string | null
           hero_image_url?: string | null
           hero_image_url_2?: string | null
