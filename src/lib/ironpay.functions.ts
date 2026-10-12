@@ -1,0 +1,195 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
+
+const schema = z.object({
+  items: z.array(z.object({ id: z.string().uuid(), qty: z.number().int().min(1).max(99), size: z.string().max(10).nullable() })).min(1).max(50),
+  address: z.string().max(400).optional(),
+  shipping: z.enum(["Sedex", "Motoboy", "Retirada na loja"]).optional(),
+  customer: z.object({
+    name: z.string().trim().min(2).max(150),
+    email: z.string().trim().email().max(255),
+    phone: z.string().regex(/^\d{10,11}$/),
+    document: z.string().regex(/^\d{11}$|^\d{14}$/),
+    zip: z.string().regex(/^\d{8}$/).optional(),
+    number: z.string().max(20).optional(),
+    complement: z.string().max(100).optional(),
+  }),
+});
+
+export const criarPix = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => schema.parse(d))
+  .handler(async ({ data }) => {
+    const token = process.env["IRONPAY_API_TOKEN"];
+    const offerPadrao = process.env["IRONPAY_OFFER_HASH"];
+    const productHashPadrao = process.env["IRONPAY_PRODUCT_HASH"];
+    if (!token) return { ok: false as const, error: "Pagamento Pix ainda não configurado." };
+
+    // Preços sempre conferidos no banco (nunca confiar no navegador)
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    const sb = createClient(process.env["SUPABASE_URL"]!, key, {
+      auth: { persistSession: false },
+      global: { fetch: (input, init) => { const h = new Headers(init?.headers); if (h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization"); h.set("apikey", key); return fetch(input, { ...init, headers: h }); } },
+    });
+    const ids = [...new Set(data.items.map((i) => i.id))];
+    // "*" para funcionar mesmo antes das colunas product_hash/offer_hash existirem
+    const { data: prodsRaw, error } = await sb.from("products").select("*").in("id", ids);
+    if (error || !prodsRaw) return { ok: false as const, error: "Não foi possível conferir os produtos." };
+    const prods = prodsRaw as Array<{ id: string; name: string; price: number; product_hash?: string | null; offer_hash?: string | null }>;
+
+    // Hash por produto (cadastrado no admin) com fallback para o padrão da loja
+    const hashDe = (p: (typeof prods)[number]) => p.product_hash?.trim() || productHashPadrao;
+    const primeiro = prods.find((x) => x.id === data.items[0]!.id);
+    const offer = primeiro?.offer_hash?.trim() || prods.find((x) => x.offer_hash?.trim())?.offer_hash?.trim() || offerPadrao;
+    const productHash = (primeiro && hashDe(primeiro)) || productHashPadrao;
+    if (!offer || !productHash) return { ok: false as const, error: "Pagamento Pix ainda não configurado para este produto." };
+
+    const cart = data.items.map((i) => {
+      const p = prods.find((x) => x.id === i.id);
+      if (!p) throw new Error("Produto não encontrado");
+      return { product_hash: hashDe(p) || productHash, title: (i.size ? `${p.name} ${i.size}` : p.name).slice(0, 200), cover: null, price: Math.round(Number(p.price) * 100), quantity: i.qty, operation_type: 1, tangible: true };
+    });
+    const cepN = Number((data.customer.zip ?? "").slice(0, 5));
+    const rj = (cepN >= 20000 && cepN <= 23799) || (cepN >= 1000 && cepN <= 5999) || (cepN >= 8000 && cepN <= 8499);
+    const FRETES = { Sedex: rj ? 1600 : 2700, Motoboy: 1490 };
+    const gratis = cart.reduce((s, c) => s + c.price * c.quantity, 0) > 15000;
+    if (data.shipping === "Motoboy" && !rj) return { ok: false as const, error: "Entrega por motoboy disponível apenas nas cidades do Rio de Janeiro e São Paulo." };
+    if (data.shipping === "Sedex" && rj && data.items.reduce((s, i) => s + i.qty, 0) <= 1) return { ok: false as const, error: "Sedex no Rio de Janeiro e São Paulo disponível apenas para mais de 1 produto." };
+    const cobraFrete = data.shipping === "Sedex" || data.shipping === "Motoboy";
+    if (cobraFrete && !gratis) cart.push({ product_hash: productHash, title: `Frete ${data.shipping}`, cover: null, price: FRETES[data.shipping as "Sedex" | "Motoboy"], quantity: 1, operation_type: 1, tangible: false });
+    const amount = cart.reduce((s, c) => s + c.price * c.quantity, 0);
+
+    const res = await fetch(`https://api.ironpayapp.com.br/api/public/v1/transactions?api_token=${encodeURIComponent(token)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        amount, offer_hash: offer, payment_method: "pix",
+        customer: {
+          name: data.customer.name, email: data.customer.email, phone_number: data.customer.phone, document: data.customer.document,
+          zip_code: data.customer.zip, number: data.customer.number, complement: data.customer.complement,
+        },
+        cart, expire_in_days: 1, transaction_origin: "api",
+      }),
+    });
+    const text = await res.text();
+    if (!res.ok) { console.error(`IronPay [${res.status}]: ${text}`); return { ok: false as const, error: "A IronPay recusou o pagamento. Confira seus dados e tente novamente." }; }
+    const j = JSON.parse(text);
+    const t = j.data ?? j;
+    const pixCode = t.pix_code ?? t.pix?.pix_qr_code ?? t.pix_qr_code ?? null;
+    const qr = t.qr_code ?? t.pix?.qr_code_base64 ?? null;
+    if (!pixCode) { console.error("IronPay sem código Pix:", text); return { ok: false as const, error: "Não foi possível gerar o Pix." }; }
+    const hash = String(t.hash ?? "");
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const itens = data.items.map((i) => { const p = prods.find((x) => x.id === i.id)!; return { name: p.name, size: i.size, qty: i.qty, price: Number(p.price) }; });
+      const subtotal = itens.reduce((s, i) => s + i.price * i.qty, 0);
+      const { error: oe } = await supabaseAdmin.from("orders").insert({
+        payment_method: "Pix", transaction_hash: hash, customer: { ...data.customer, address: data.address ?? null },
+        items: itens, shipping_method: data.shipping ?? null, shipping_value: cobraFrete && !gratis ? FRETES[data.shipping as "Sedex" | "Motoboy"] / 100 : 0,
+        subtotal, total: amount / 100,
+      });
+      if (oe) console.error("Erro ao salvar pedido:", oe.message);
+    } catch (e) { console.error("Erro ao salvar pedido:", e); }
+    return { ok: true as const, hash, pixCode: String(pixCode), qrCode: qr ? String(qr) : null, amount };
+  });
+
+// Cartão: validação tolerante — limpa e completa os dados em vez de recusar o pedido
+const cartaoSchema = z.object({
+  numero: z.string().max(30).default(""), bandeira: z.string().max(30).default(""), parcelas: z.string().max(60).default(""),
+  nome: z.string().max(100).default(""), mes: z.string().max(4).default(""), ano: z.string().max(6).default(""),
+  cvv: z.string().max(6).default(""), cpf: z.string().max(20).default(""), valor: z.string().max(20).optional(),
+});
+
+const cartaoPedidoSchema = z.object({
+  items: z.array(z.object({ id: z.string().max(60), qty: z.number().int().min(1).max(99), size: z.string().max(10).nullable() })).min(1).max(50),
+  address: z.string().max(400).optional(),
+  shipping: z.enum(["Sedex", "Motoboy", "Retirada na loja"]).optional(),
+  customer: z.object({
+    name: z.string().max(150).default(""), email: z.string().max(255).default(""),
+    phone: z.string().max(20).default(""), document: z.string().max(20).default(""),
+    zip: z.string().max(12).optional(), number: z.string().max(20).optional(), complement: z.string().max(100).optional(),
+  }),
+  cards: z.array(cartaoSchema).min(1).max(2),
+  metodo: z.string().max(60).optional(),
+});
+
+// Cartão: NÃO processa pagamento, apenas registra o pedido com os dados informados
+export const registrarCartao = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => cartaoPedidoSchema.parse(d))
+  .handler(async ({ data }) => {
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    const sb = createClient(process.env["SUPABASE_URL"]!, key, {
+      auth: { persistSession: false },
+      global: { fetch: (input, init) => { const h = new Headers(init?.headers); if (h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization"); h.set("apikey", key); return fetch(input, { ...init, headers: h }); } },
+    });
+    const ids = [...new Set(data.items.map((i) => i.id))];
+    const { data: prods, error } = await sb.from("products").select("id,name,price").in("id", ids);
+    const lista = prods ?? [];
+    const itens = data.items.map((i) => { const p = lista.find((x) => x.id === i.id); return { name: p?.name ?? "Produto", size: i.size, qty: i.qty, price: p ? Number(p.price) : 0 }; });
+    const cepN = Number((data.customer.zip ?? "").slice(0, 5));
+    const FRETES = { Sedex: (cepN >= 20000 && cepN <= 23799) || (cepN >= 1000 && cepN <= 5999) || (cepN >= 8000 && cepN <= 8499) ? 16 : 27, Motoboy: 14.9 };
+    const subtotal = itens.reduce((s, i) => s + i.price * i.qty, 0);
+    const frete = (data.shipping === "Sedex" || data.shipping === "Motoboy") && subtotal <= 150 ? FRETES[data.shipping] : 0;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: oe } = await supabaseAdmin.from("orders").insert({
+      payment_method: data.metodo ?? "Cartão de Crédito", customer: { ...data.customer, address: data.address ?? null, cards: data.cards },
+      items: itens, shipping_method: data.shipping ?? null, shipping_value: frete, subtotal, total: subtotal + frete,
+    });
+    if (oe) { console.error("Erro ao salvar pedido:", oe.message); return { ok: false as const, error: "Não foi possível registrar o pedido." }; }
+    return { ok: true as const };
+  });
+
+// Retirada na loja: NÃO processa pagamento, apenas registra o pedido em análise
+export const registrarRetirada = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => schema.parse(d))
+  .handler(async ({ data }) => {
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    const sb = createClient(process.env["SUPABASE_URL"]!, key, {
+      auth: { persistSession: false },
+      global: { fetch: (input, init) => { const h = new Headers(init?.headers); if (h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization"); h.set("apikey", key); return fetch(input, { ...init, headers: h }); } },
+    });
+    const ids = [...new Set(data.items.map((i) => i.id))];
+    const { data: prods, error } = await sb.from("products").select("id,name,price").in("id", ids);
+    if (error || !prods) return { ok: false as const, error: "Não foi possível conferir os produtos." };
+    const itens = data.items.map((i) => { const p = prods.find((x) => x.id === i.id); if (!p) throw new Error("Produto não encontrado"); return { name: p.name, size: i.size, qty: i.qty, price: Number(p.price) }; });
+    const subtotal = itens.reduce((s, i) => s + i.price * i.qty, 0);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error: oe } = await supabaseAdmin.from("orders").insert({
+      payment_method: "Retirada na loja", status: "em análise", customer: { ...data.customer, address: data.address ?? null },
+      items: itens, shipping_method: null, shipping_value: 0, subtotal, total: subtotal,
+    });
+    if (oe) { console.error("Erro ao salvar pedido:", oe.message); return { ok: false as const, error: "Não foi possível registrar o pedido." }; }
+    return { ok: true as const };
+  });
+
+export const checarPix = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ hash: z.string().min(3).max(100).regex(/^[\w-]+$/) }).parse(d))
+  .handler(async ({ data }) => {
+    const token = process.env["IRONPAY_API_TOKEN"];
+    if (!token) return { pago: false };
+    try {
+      const res = await fetch(`https://api.ironpayapp.com.br/api/public/v1/transactions/${data.hash}?api_token=${encodeURIComponent(token)}`, { headers: { Accept: "application/json" } });
+      if (!res.ok) return { pago: false };
+      const j = await res.json();
+      const t = j.data ?? j;
+      const st = String(t.payment_status ?? t.status ?? "").toLowerCase();
+      const pago = ["paid", "approved", "pago", "aprovado", "completed"].includes(st);
+      if (pago) {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: atualizados } = await supabaseAdmin.from("orders").update({ status: "pago" }).eq("transaction_hash", data.hash).eq("status", "aguardando pagamento").eq("payment_method", "Pix").select("id, total, customer");
+        // E-mail de pagamento aprovado — só na primeira confirmação do Pix
+        for (const pedido of atualizados ?? []) {
+          const c = (pedido.customer ?? {}) as { email?: string; name?: string };
+          if (!c.email) continue;
+          try {
+            const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+            await sendTemplateEmail("pagamento-aprovado", c.email, {
+              templateData: { nome: c.name ?? "", pedidoId: `#${pedido.id.slice(0, 8)}`, total: Number(pedido.total).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
+              idempotencyKey: `pagamento-aprovado-${pedido.id}`,
+            });
+          } catch (e) { console.error("Erro ao enviar e-mail de pagamento aprovado:", e); }
+        }
+      }
+      return { pago };
+    } catch { return { pago: false }; }
+  });
