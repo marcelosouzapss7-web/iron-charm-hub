@@ -24,7 +24,7 @@ export function StoreHeader() {
   const t = norm(termo.trim());
   const achados = t ? produtos.filter((p) => norm(p.name).includes(t)) : [];
   const { data: logoUrl } = useQuery({
-    queryKey: ["header_logo"],
+    queryKey: ["site_settings", "header_logo"],
     queryFn: async () =>
       ((await supabase.from("site_settings").select("logo_url").eq("id", 1).maybeSingle()).data?.logo_url as string | null) ?? null,
   });
