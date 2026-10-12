@@ -26,8 +26,12 @@ export function StoreHeader() {
   const achados = t ? produtos.filter((p) => norm(p.name).includes(t)) : [];
   const qtd = useCart().items.reduce((s, i) => s + i.qty, 0);
   return (
-    <header className="sticky top-0 z-10 flex h-[72px] items-center justify-between bg-brand px-4 shadow-sm">
-      <div className="flex items-center gap-5 text-background">
+    <header className="sticky top-0 z-10 shadow-sm">
+      <div className="bg-primary px-3 py-2 text-[15px] leading-snug text-primary-foreground">
+        <strong>Alta demanda</strong> ⚠️ Confira o prazo de entrega na finalização do seu pedido.
+      </div>
+      <div className="relative flex h-16 items-center justify-between bg-background px-4">
+      <div className="flex items-center gap-5 text-foreground">
         <button
           aria-label="Abrir menu"
           onClick={() => setMenu(true)}
@@ -62,9 +66,9 @@ export function StoreHeader() {
         onClick={() => { window.scrollTo(0, 0); setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50); }}
         className="absolute left-1/2 -translate-x-1/2 shrink-0"
       >
-        <span className="flex items-center gap-2"><img src={logo} alt="" className="size-11 rounded-full" /><span className="whitespace-nowrap text-lg font-extrabold tracking-tight text-background sm:text-2xl">Look China</span></span>
+        <span className="flex items-center gap-2"><img src={logo} alt="" className="size-11 rounded-full" /><span className="whitespace-nowrap text-xl font-extrabold tracking-tight text-primary sm:text-2xl">Look China</span></span>
       </Link>
-      <div className="flex items-center gap-5 text-background">
+      <div className="flex items-center gap-5 text-foreground">
         <User className="size-7" strokeWidth={2.4} />
         <button
           aria-label="Abrir sacola"
@@ -72,15 +76,16 @@ export function StoreHeader() {
           className="relative grid size-8 place-items-center"
         >
           <ShoppingBag className="size-7" strokeWidth={2.4} />
-          <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-background text-[9px] font-bold text-brand">
+          <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
             {qtd}
           </span>
         </button>
         <CartDrawer />
       </div>
+      </div>
       {busca && (
         <div
-          className="fixed inset-x-0 bottom-0 top-[72px] z-40 bg-foreground/60"
+          className="fixed inset-x-0 bottom-0 top-[120px] z-40 bg-foreground/60"
           onClick={() => {
             setBusca(false);
             setTermo("");

@@ -137,13 +137,13 @@ function Index() {
         <StoreHeader />
 
         {hero && (
-          <section className="bg-background px-[18px] pb-2 pt-5">
+          <section className="bg-background">
             <button onClick={irParaProdutos} className="block w-full" aria-label="Ver produtos">
               <img
                 src={hero}
                 alt="Promoção da loja"
                 fetchPriority="high"
-                className="block h-auto w-full rounded-lg shadow-md"
+                className="block h-auto w-full"
               />
             </button>
           </section>
