@@ -5,7 +5,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { cart, useCart } from "@/lib/cart";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const produtosQuery = queryOptions({
   queryKey: ["products"],
@@ -104,7 +104,9 @@ function Index() {
     if (heros.length < 2) return;
     const t = setInterval(() => setSlide((n) => n + 1), 3000);
     return () => clearInterval(t);
-  }, [heros.length]);
+  }, [heros.length, slide]);
+  const toqueX = useRef<number | null>(null);
+  const arrastou = useRef(false);
 
   function irParaProdutos() {
     document.getElementById("produtos")?.scrollIntoView({ behavior: "smooth" });
@@ -213,8 +215,23 @@ function Index() {
         <StoreHeader />
 
         {heros.length > 0 && (
-          <section className="relative overflow-hidden bg-background">
-            <button onClick={irParaProdutos} className="block w-full" aria-label="Ver produtos">
+          <section
+            className="relative overflow-hidden bg-background"
+            onTouchStart={(e) => (toqueX.current = (e.touches[0]?.clientX ?? null))}
+            onTouchEnd={(e) => {
+              if (toqueX.current === null || heros.length < 2) return;
+              const dx = (e.changedTouches[0]?.clientX ?? toqueX.current) - toqueX.current;
+              toqueX.current = null;
+              if (Math.abs(dx) < 40) return;
+              arrastou.current = true;
+              setTimeout(() => (arrastou.current = false), 400);
+              setSlide((n) => {
+                const atual = n % heros.length;
+                return dx < 0 ? (atual + 1) % heros.length : (atual - 1 + heros.length) % heros.length;
+              });
+            }}
+          >
+            <button onClick={() => { if (arrastou.current) { arrastou.current = false; return; } irParaProdutos(); }} className="block w-full" aria-label="Ver produtos">
               <div
                 className="flex transition-transform duration-700 ease-in-out"
                 style={{ transform: `translateX(-${(slide % heros.length) * 100}%)` }}
