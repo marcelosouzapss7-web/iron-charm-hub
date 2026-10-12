@@ -224,6 +224,7 @@ function Index() {
               toqueX.current = null;
               if (Math.abs(dx) < 40) return;
               arrastou.current = true;
+              setTimeout(() => (arrastou.current = false), 400);
               setSlide((n) => {
                 const atual = n % heros.length;
                 return dx < 0 ? (atual + 1) % heros.length : (atual - 1 + heros.length) % heros.length;
