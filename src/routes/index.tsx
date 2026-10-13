@@ -141,8 +141,9 @@ function Index() {
     );
   }
 
-  const destaques = produtos.slice(0, 8);
-  const resto = produtos.slice(8);
+  const comuns = produtos.filter((p) => !p.best_seller);
+  const destaques = comuns.slice(0, 8);
+  const resto = comuns.slice(8);
   const card = (p: (typeof produtos)[number], idx: number) => {
               return (
                 <div>
