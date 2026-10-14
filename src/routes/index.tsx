@@ -32,21 +32,21 @@ export const Route = createFileRoute("/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Look China — Nossos Produtos" },
+      { title: "wepink :: Bem-vindos ao seu único e essencial mundo rosa..." },
       {
         name: "description",
-        content: "Confira os produtos do Look China com os melhores preços.",
+        content: "Bem-vindos ao seu único e essencial mundo rosa. Confira os produtos wepink.",
       },
-      { property: "og:title", content: "Look China — Nossos Produtos" },
+      { property: "og:title", content: "wepink :: Bem-vindos ao seu único e essencial mundo rosa..." },
       {
         property: "og:description",
-        content: "Confira os produtos do Look China com os melhores preços.",
+        content: "Bem-vindos ao seu único e essencial mundo rosa. Confira os produtos wepink.",
       },
       { property: "og:type", content: "website" },
       {
         property: "og:image",
         content:
-          "https://lookchinavariedades.store/og-look-china.jpg",
+          "https://iron-charm-hub.lovable.app/og-wepink.jpg",
       },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
@@ -54,7 +54,7 @@ export const Route = createFileRoute("/")({
       {
         name: "twitter:image",
         content:
-          "https://lookchinavariedades.store/og-look-china.jpg",
+          "https://iron-charm-hub.lovable.app/og-wepink.jpg",
       },
     ],
   }),

@@ -9,20 +9,20 @@ import { cart } from "@/lib/cart";
 export const Route = createFileRoute("/produto/$id")({
   head: () => ({
     meta: [
-      { title: "Produto — Look China" },
+      { title: "Produto — wepink" },
       {
         name: "description",
-        content: "Veja detalhes, tamanhos e preço do produto no Look China.",
+        content: "Veja detalhes, tamanhos e preço do produto na wepink.",
       },
-      { property: "og:title", content: "Produto — Look China" },
+      { property: "og:title", content: "Produto — wepink" },
       {
         property: "og:description",
-        content: "Veja detalhes, tamanhos e preço do produto no Look China.",
+        content: "Veja detalhes, tamanhos e preço do produto na wepink.",
       },
       { property: "og:type", content: "product" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: "https://lookchinavariedades.store/og-look-china.jpg" },
-      { name: "twitter:image", content: "https://lookchinavariedades.store/og-look-china.jpg" },
+      { property: "og:image", content: "https://iron-charm-hub.lovable.app/og-wepink.jpg" },
+      { name: "twitter:image", content: "https://iron-charm-hub.lovable.app/og-wepink.jpg" },
     ],
   }),
   component: Produto,
