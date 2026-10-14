@@ -323,6 +323,12 @@ function Produtos() {
     if (!name.trim() || isNaN(valor)) return void toast.error("Preencha nome e preço corretamente");
     const antigo = oldPrice.trim() ? Number(oldPrice.replace(",", ".")) : null;
     if (antigo !== null && isNaN(antigo)) return void toast.error("Valor 'De' inválido");
+    const normNome = (s: string) =>
+      s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLowerCase();
+    if (produtos.some((p) => p.id !== editId && normNome(p.name) === normNome(name))) {
+      toast.error("Já existe um produto cadastrado com esse nome.");
+      return;
+    }
     setSaving(true);
     const productId = editId ?? crypto.randomUUID();
     const uploaded: string[] = [];
