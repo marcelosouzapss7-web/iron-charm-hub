@@ -1,0 +1,1 @@
+ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS sedex_price numeric, ADD COLUMN IF NOT EXISTS motoboy_price numeric;
