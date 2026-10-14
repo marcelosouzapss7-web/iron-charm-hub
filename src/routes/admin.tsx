@@ -736,6 +736,19 @@ function Config() {
         "Remover imagem do Pix",
       )}
       <div className="space-y-4 rounded-xl bg-background p-4 shadow-sm">
+        <Label>Retirada na loja (endereço que o cliente vê)</Label>
+        <Input
+          key={"ret" + ((settings as any)?.pickup_address ?? "")}
+          placeholder="Retirada em loja Ribeirão Preto — DUQUE DE CAXIAS, 416 CENTRO"
+          defaultValue={(settings as any)?.pickup_address ?? ""}
+          disabled={saving}
+          onBlur={(e) => {
+            const v = e.target.value.trim() || null;
+            if (v !== ((settings as any)?.pickup_address ?? null)) save({ pickup_address: v } as any);
+          }}
+        />
+      </div>
+      <div className="space-y-4 rounded-xl bg-background p-4 shadow-sm">
         <Label>Descrição do rodapé (dados da empresa, uma linha por campo)</Label>
         <Textarea
           rows={5}
