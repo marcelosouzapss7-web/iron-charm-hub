@@ -124,9 +124,11 @@ export type Database = {
           hero_image_url_3: string | null
           id: number
           logo_url: string | null
+          motoboy_price: number | null
           payment_logo_url: string | null
           pickup_address: string | null
           pix_logo_url: string | null
+          sedex_price: number | null
           updated_at: string
         }
         Insert: {
@@ -142,9 +144,11 @@ export type Database = {
           hero_image_url_3?: string | null
           id?: number
           logo_url?: string | null
+          motoboy_price?: number | null
           payment_logo_url?: string | null
           pickup_address?: string | null
           pix_logo_url?: string | null
+          sedex_price?: number | null
           updated_at?: string
         }
         Update: {
@@ -160,9 +164,11 @@ export type Database = {
           hero_image_url_3?: string | null
           id?: number
           logo_url?: string | null
+          motoboy_price?: number | null
           payment_logo_url?: string | null
           pickup_address?: string | null
           pix_logo_url?: string | null
+          sedex_price?: number | null
           updated_at?: string
         }
         Relationships: []

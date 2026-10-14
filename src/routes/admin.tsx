@@ -749,6 +749,36 @@ function Config() {
         />
       </div>
       <div className="space-y-4 rounded-xl bg-background p-4 shadow-sm">
+        <Label>Sedex (valor da entrega em R$)</Label>
+        <Input
+          key={"sedex" + ((settings as any)?.sedex_price ?? "")}
+          inputMode="decimal"
+          placeholder="Ex.: 27,00 (vazio = 16,00 Rio/SP e 27,00 demais)"
+          defaultValue={(settings as any)?.sedex_price != null ? String((settings as any).sedex_price).replace(".", ",") : ""}
+          disabled={saving}
+          onBlur={(e) => {
+            const t = e.target.value.trim().replace(",", ".");
+            const v = t ? Number(t) : null;
+            if (v !== null && (!Number.isFinite(v) || v < 0)) return void toast.error("Valor do Sedex inválido.");
+            if (v !== ((settings as any)?.sedex_price ?? null)) save({ sedex_price: v } as any);
+          }}
+        />
+        <Label>Motoboy (valor da entrega em R$)</Label>
+        <Input
+          key={"moto" + ((settings as any)?.motoboy_price ?? "")}
+          inputMode="decimal"
+          placeholder="Ex.: 14,90"
+          defaultValue={(settings as any)?.motoboy_price != null ? String((settings as any).motoboy_price).replace(".", ",") : ""}
+          disabled={saving}
+          onBlur={(e) => {
+            const t = e.target.value.trim().replace(",", ".");
+            const v = t ? Number(t) : null;
+            if (v !== null && (!Number.isFinite(v) || v < 0)) return void toast.error("Valor do Motoboy inválido.");
+            if (v !== ((settings as any)?.motoboy_price ?? null)) save({ motoboy_price: v } as any);
+          }}
+        />
+      </div>
+      <div className="space-y-4 rounded-xl bg-background p-4 shadow-sm">
         <Label>Descrição do rodapé (dados da empresa, uma linha por campo)</Label>
         <Textarea
           rows={5}
