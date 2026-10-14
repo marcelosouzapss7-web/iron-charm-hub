@@ -9,15 +9,15 @@ import { cart } from "@/lib/cart";
 export const Route = createFileRoute("/produto/$id")({
   head: () => ({
     meta: [
-      { title: "Produto — Look China" },
+      { title: "Produto — wepink" },
       {
         name: "description",
-        content: "Veja detalhes, tamanhos e preço do produto no Look China.",
+        content: "Veja detalhes, tamanhos e preço do produto na wepink.",
       },
-      { property: "og:title", content: "Produto — Look China" },
+      { property: "og:title", content: "Produto — wepink" },
       {
         property: "og:description",
-        content: "Veja detalhes, tamanhos e preço do produto no Look China.",
+        content: "Veja detalhes, tamanhos e preço do produto na wepink.",
       },
       { property: "og:type", content: "product" },
       { name: "twitter:card", content: "summary_large_image" },
