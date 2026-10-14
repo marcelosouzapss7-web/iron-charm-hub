@@ -99,15 +99,21 @@ function Checkout() {
   // Cidade do Rio de Janeiro: CEP 20000-000 a 23799-999
   const rj = cepDig.length === 8 && ((cep5 >= 20000 && cep5 <= 23799) || (cep5 >= 1000 && cep5 <= 5999) || (cep5 >= 8000 && cep5 <= 8499)); // Rio ou São Paulo capital
   const qtdItens = items.reduce((s, i) => s + i.qty, 0);
+  const { data: cfgFrete } = useQuery({
+    queryKey: ["site_settings"],
+    queryFn: async () => (await supabase.from("site_settings").select("*").eq("id", 1).maybeSingle()).data,
+  });
+  const sedexAdmin = (cfgFrete as any)?.sedex_price != null ? Number((cfgFrete as any).sedex_price) : null;
+  const motoboyAdmin = (cfgFrete as any)?.motoboy_price != null ? Number((cfgFrete as any).motoboy_price) : null;
   // Depois das 18h (horário de Brasília) o motoboy entrega amanhã
   const horaBR = Number(new Intl.DateTimeFormat("pt-BR", { hour: "numeric", hourCycle: "h23", timeZone: "America/Sao_Paulo" }).format(new Date()));
   const motoboyAmanha = horaBR >= 18;
   // Rio: Sedex (R$ 16) só com mais de 1 produto; Motoboy sempre
   const fretes = rj ? [
-    ...(qtdItens > 1 ? [{ n: "Sedex", p: "Em até 1 dia útil", v: 16 }] : []),
-    { n: "Motoboy", p: motoboyAmanha && frete === "Motoboy" ? "Pedido após as 18h: entrega amanhã" : "Entrega em até 40 minutos", v: 14.9 },
+    ...(qtdItens > 1 ? [{ n: "Sedex", p: "Em até 1 dia útil", v: sedexAdmin ?? 16 }] : []),
+    { n: "Motoboy", p: motoboyAmanha && frete === "Motoboy" ? "Pedido após as 18h: entrega amanhã" : "Entrega em até 40 minutos", v: motoboyAdmin ?? 14.9 },
   ] : [
-    { n: "Sedex", p: "Em até 1 dia útil", v: 27 },
+    { n: "Sedex", p: "Em até 1 dia útil", v: sedexAdmin ?? 27 },
   ];
   if (!fretes.some((f) => f.n === frete)) queueMicrotask(() => setFrete(fretes[0]!.n));
 
