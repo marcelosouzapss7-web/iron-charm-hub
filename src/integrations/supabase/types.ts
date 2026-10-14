@@ -125,6 +125,7 @@ export type Database = {
           id: number
           logo_url: string | null
           payment_logo_url: string | null
+          pickup_address: string | null
           pix_logo_url: string | null
           updated_at: string
         }
@@ -142,6 +143,7 @@ export type Database = {
           id?: number
           logo_url?: string | null
           payment_logo_url?: string | null
+          pickup_address?: string | null
           pix_logo_url?: string | null
           updated_at?: string
         }
@@ -159,6 +161,7 @@ export type Database = {
           id?: number
           logo_url?: string | null
           payment_logo_url?: string | null
+          pickup_address?: string | null
           pix_logo_url?: string | null
           updated_at?: string
         }
