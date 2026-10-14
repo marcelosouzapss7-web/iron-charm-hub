@@ -248,9 +248,9 @@ function Index() {
           <h1 className="px-4 pb-6 pt-8 text-center text-[2.4rem] font-bold leading-[1.05] text-primary">
             queridinhos da wepink
           </h1>
-          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
+          <div className="flex snap-x snap-mandatory scroll-px-8 gap-5 overflow-x-auto px-8 pb-2 [scrollbar-width:none]">
             {destaques.map((p, idx) => (
-              <div key={p.id} className="w-[62%] shrink-0 snap-start">{card(p, idx)}</div>
+              <div key={p.id} className="w-[64%] shrink-0 snap-start">{card(p, idx)}</div>
             ))}
           </div>
           {(s?.featured_image_url || s?.featured_title) && (
