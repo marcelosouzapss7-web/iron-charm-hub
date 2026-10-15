@@ -32,15 +32,15 @@ export const Route = createFileRoute("/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "wepink :: Bem-vindos ao seu único e essencial mundo rosa..." },
+      { title: "Essencial loja completa com novidades e descontos" },
       {
         name: "description",
-        content: "Bem-vindos ao seu único e essencial mundo rosa. Confira os produtos wepink.",
+        content: "Essencial loja completa com novidades e descontos.",
       },
-      { property: "og:title", content: "wepink :: Bem-vindos ao seu único e essencial mundo rosa..." },
+      { property: "og:title", content: "Essencial loja completa com novidades e descontos" },
       {
         property: "og:description",
-        content: "Bem-vindos ao seu único e essencial mundo rosa. Confira os produtos wepink.",
+        content: "Essencial loja completa com novidades e descontos.",
       },
       { property: "og:type", content: "website" },
       {
